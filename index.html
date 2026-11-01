@@ -173,8 +173,12 @@ body.kb .panel{padding-block:8px}
 }
 /* Symbolleiste im Tastatur-Modus: per JS ans Dokumentende umgehängt und zurück.
    Im flexiblen Body-Layout sitzt sie so direkt über der Tastatur — ganz ohne
-   position:fixed/sticky (iOS reißt sticky unter der Körper-Transform ab). */
-body.kb .kp{position:static;flex:none;margin:0 10px 6px;height:44px;padding:0 8px;
+   position:fixed/sticky (iOS reißt sticky unter der Körper-Transform ab).
+   width:auto + min-width:0 ist PFLICHT: Der Flex-Grundwert min-width:auto würde
+   die Leiste sonst mindestens so breit machen wie ihren gesamten Inhalt — das
+   ganze Dokument würde breiter als der Bildschirm und ließe sich nicht mehr
+   seitlich in Position bringen. */
+body.kb .kp{position:static;flex:none;margin:0 10px 6px;height:44px;padding:0 8px;width:auto;min-width:0;
   flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden}
 body.kb .kg{flex:none;flex-wrap:nowrap;align-items:center}
 body.kb .toast{bottom:60px}
@@ -701,7 +705,11 @@ var M=(function(){
   function fitKb(){
     if(!vv)return;
     var root=document.documentElement;
-    if(kbField&&isTouch){
+    /* Ist die Tastatur gerade wirklich sichtbar? (vv.height schrumpft um ihre Höhe)
+       — nicht nur der Fokus entscheidet, sonst bleibt die Leiste unten hängen, wenn
+       iOS die Tastatur ohne blur-Ereignis schließt. */
+    var kbOpen=vv.height<window.innerHeight-40;
+    if(kbField&&isTouch&&kbOpen){
       setSt(document.body,'height',vv.height+'px');
       /* offsetTop-Ausgleich nur, wenn das Dokument selbst nicht scrollen kann
          (Querformat/App-Ansicht). Im Hochformat scrollt iOS die Seite von selbst. */
@@ -724,7 +732,7 @@ var M=(function(){
         setSt(document.body,'transform','translate3d(0,0,0)');
         dockKp(false);
       }
-      document.body.classList.toggle('kb',vv.height<window.innerHeight-40);
+      document.body.classList.toggle('kb',true);
     }else{
       setSt(document.body,'height','');setSt(document.body,'transform','');
       setSt(root,'height','');setSt(root,'overflow','');
