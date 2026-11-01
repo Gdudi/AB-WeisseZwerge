@@ -171,14 +171,13 @@ body.kb .panel{padding-block:8px}
 @media (min-width:800px){
   body.kb .top{flex-wrap:nowrap}
 }
-/* Symbolleiste im Tastatur-Modus: unten fest an den sichtbaren Bereich (direkt
-   über der Tastatur) gedockt, exakt 44px hoch, Inhalt eine Zeile, seitlich
-   scrollbar. position:sticky in Verbindung mit der Körper-Transform reißt iOS
-   ab — deshalb hier bewusst fixed statt sticky. */
-body.kb .kp{position:fixed;left:10px;right:10px;bottom:6px;z-index:30;
-  flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;height:44px;padding:0 8px}
+/* Symbolleiste im Tastatur-Modus: per JS ans Dokumentende umgehängt und zurück.
+   Im flexiblen Body-Layout sitzt sie so direkt über der Tastatur — ganz ohne
+   position:fixed/sticky (iOS reißt sticky unter der Körper-Transform ab). */
+body.kb .kp{position:static;flex:none;margin:0 10px 6px;height:44px;padding:0 8px;
+  flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden}
 body.kb .kg{flex:none;flex-wrap:nowrap;align-items:center}
-body.kb main{padding-bottom:64px}
+body.kb .toast{bottom:60px}
 
 @media (max-width:860px){
   html,body{height:auto}
@@ -691,6 +690,14 @@ var M=(function(){
     try{box.scrollIntoView({block:'nearest'});}catch(e){if(box.scrollIntoView)box.scrollIntoView();}
   }
   function setSt(el,k,val){if(el.style[k]!==val)el.style[k]=val;}
+  /* Leiste umhängen: im Tastatur-Modus ans Ende des Body (Flex-Spalte) → unten über
+     der Tastatur; sonst zurück auf den angestammten Platz oben in der Aufgabenspalte */
+  var kpEl=$('kp'),kpHome=$('main');
+  function dockKp(dock){
+    if(!kpEl)return;
+    if(dock){if(kpEl.parentElement!==document.body)document.body.appendChild(kpEl);}
+    else if(kpEl.parentElement!==kpHome)kpHome.insertBefore(kpEl,kpHome.firstChild);
+  }
   function fitKb(){
     if(!vv)return;
     var root=document.documentElement;
@@ -711,15 +718,18 @@ var M=(function(){
         setSt(document.body,'transform','translate3d(0,'+(off>3?Math.round(off):0)+'px,0)');
         if(window.scrollX||window.scrollY)window.scrollTo(0,0);
         if(root.scrollLeft)root.scrollLeft=0;
+        dockKp(true);
       }else{
         setSt(root,'height','');setSt(root,'overflow','');
         setSt(document.body,'transform','translate3d(0,0,0)');
+        dockKp(false);
       }
       document.body.classList.toggle('kb',vv.height<window.innerHeight-40);
     }else{
       setSt(document.body,'height','');setSt(document.body,'transform','');
       setSt(root,'height','');setSt(root,'overflow','');
       document.body.classList.remove('kb');
+      dockKp(false);
     }
   }
   if(vv&&isTouch){
