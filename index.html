@@ -86,6 +86,10 @@ table.data td:nth-child(2){font-family:var(--f-data);color:var(--accent);white-s
 table.data td:nth-child(3){font-family:var(--f-data);font-size:13px}
 table.data tr.own td{background:var(--accent-soft)}
 table.data tr.own td:first-child{padding-left:6px}
+/* Werte-Spalte: antippen kopiert den Wert */
+table.data td:nth-child(3){cursor:pointer}
+table.data td.copy:hover,table.data td.copy:focus{background:var(--accent-soft)}
+table.data tr.own td.copy:hover,table.data tr.own td.copy:focus,table.data td.copy:active{background:var(--field)}
 
 /* Eingabeleiste für Formeln (bleibt oben in der Aufgabenspalte stehen) */
 .kp{position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;gap:6px 12px;padding:6px 8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 16px rgba(10,20,40,.10)}
@@ -167,6 +171,10 @@ body.kb .panel{padding-block:8px}
 @media (min-width:800px){
   body.kb .top{flex-wrap:nowrap}
 }
+/* Symbolleiste im Tastatur-Modus: nur eine Zeile hoch, seitlich scrollbar
+   (statt in mehrere Zeilen umzubrechen) */
+body.kb .kp{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+body.kb .kg{flex:none}
 
 @media (max-width:860px){
   html,body{height:auto}
@@ -631,6 +639,40 @@ var M=(function(){
     if(t.classList&&t.classList.contains('mfi'))return;
     progress();save();
   });
+
+  /* Messwerte antippen → Wert in die Zwischenablage kopieren.
+     Die enabled-Fähigkeit wird per JS angehängt (progressive enhancement);
+     die Tabelle bleibt ohne JS unverändert. */
+  function legacyCopy(text){
+    var ta=document.createElement('textarea');
+    ta.value=text;ta.setAttribute('readonly','');
+    ta.style.position='fixed';ta.style.left='-9999px';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');}catch(e){}
+    ta.remove();
+  }
+  function copyValue(td){
+    var v=td.textContent.trim();
+    function ok(){td.classList.add('tap');setTimeout(function(){td.classList.remove('tap');},600);toast('„'+v+'“ kopiert.');}
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(v).then(ok,function(){legacyCopy(v);ok();});
+    }else{legacyCopy(v);ok();}
+  }
+  var dataTable=document.querySelector('table.data');
+  if(dataTable){
+    Array.prototype.forEach.call(dataTable.querySelectorAll('tr td:nth-child(3)'),function(t){
+      t.classList.add('copy');t.tabIndex=0;t.title='Wert kopieren';
+    });
+    dataTable.addEventListener('click',function(e){
+      var td=e.target.closest('td.copy');
+      if(td)copyValue(td);
+    });
+    dataTable.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var td=e.target.closest('td.copy');
+      if(td){e.preventDefault();copyValue(td);}
+    });
+  }
 
   /* iPad-Bildschirmtastatur: iOS legt die Tastatur ÜBER die Seite (Layouthöhe bleibt
      unverändert). Solange ein Eingabefeld fokussiert ist, wird die App-Höhe deshalb an
