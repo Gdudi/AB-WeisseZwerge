@@ -171,11 +171,14 @@ body.kb .panel{padding-block:8px}
 @media (min-width:800px){
   body.kb .top{flex-wrap:nowrap}
 }
-/* Symbolleiste im Tastatur-Modus: exakt eine Zeile (40px) hoch, seitlich scrollbar.
-   Feste Höhe + nowrap verhindern, dass iOS die Leiste einrollt oder Gruppen intern
-   umbricht; der Inhalt ragt nach rechts und wird angepuft/gewischt. */
-body.kb .kp{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;height:40px;padding:0 8px}
+/* Symbolleiste im Tastatur-Modus: unten fest an den sichtbaren Bereich (direkt
+   über der Tastatur) gedockt, exakt 44px hoch, Inhalt eine Zeile, seitlich
+   scrollbar. position:sticky in Verbindung mit der Körper-Transform reißt iOS
+   ab — deshalb hier bewusst fixed statt sticky. */
+body.kb .kp{position:fixed;left:10px;right:10px;bottom:6px;z-index:30;
+  flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;height:44px;padding:0 8px}
 body.kb .kg{flex:none;flex-wrap:nowrap;align-items:center}
+body.kb main{padding-bottom:64px}
 
 @media (max-width:860px){
   html,body{height:auto}
@@ -702,16 +705,15 @@ var M=(function(){
         setSt(root,'height',vv.height+'px');
         setSt(root,'overflow','hidden');
         var off=vv.offsetTop;
-        /* 4px-Stille: Kleines Wackeln des visuellen Viewports soll nicht die ganze
-           App neu zeichnen (flackern beim Tippen auf die Symbole). */
-        setSt(document.body,'transform',off>3?'translateY('+off+'px)':'none');
-        /* Hartes Anlegen an oben/links: Verschiebungen der Ansicht (z. B. seitliches
-           Weggleiten durch iOS beim Öffnen der Tastatur) sofort zurücksetzen */
+        /* Immer anwesende 3d-Transform: body bleibt so konstanter Ursprung für die
+           unten angedockte Leiste (position:fixed) und wandert mit dem sichtbaren
+           Bereich mit; 4px-Stille verhindert Flackern beim Tippen der Symbole. */
+        setSt(document.body,'transform','translate3d(0,'+(off>3?Math.round(off):0)+'px,0)');
         if(window.scrollX||window.scrollY)window.scrollTo(0,0);
         if(root.scrollLeft)root.scrollLeft=0;
       }else{
         setSt(root,'height','');setSt(root,'overflow','');
-        setSt(document.body,'transform','none');
+        setSt(document.body,'transform','translate3d(0,0,0)');
       }
       document.body.classList.toggle('kb',vv.height<window.innerHeight-40);
     }else{
