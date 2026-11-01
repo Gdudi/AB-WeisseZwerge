@@ -144,7 +144,11 @@ textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:va
 /* Bei geöffneter Bildschirmtastatur (Klasse .kb wird per JS gesetzt): nur vertikal
    enger (Höhe!), horizontale Maße (Textbreite, Feld-/Knopfbreiten, Abstände) bleiben
    unverändert, damit nichts seitlich springt oder schmaler wird. */
-body.kb .top{padding-block:3px;justify-content:space-between}
+/* Bei geöffneter Tastatur imitiert iOS mitunter die Tastaturabstände als
+   Safe-Area-Insets (links/recht) → Seitenabstand fest auf 16px setzen, damit die
+   Kopfzeile wirklich bis zu den Rändern genutzt wird. */
+body.kb{padding-left:16px;padding-right:16px}
+body.kb .top{width:100%;padding-block:3px;justify-content:space-between}
 body.kb .title{margin-right:0}
 body.kb .top .title p{display:none}
 /* Kopfzeile bleibt in einer Zeile über die volle Breite (nur bei breiten Layouts) */
