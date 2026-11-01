@@ -171,10 +171,11 @@ body.kb .panel{padding-block:8px}
 @media (min-width:800px){
   body.kb .top{flex-wrap:nowrap}
 }
-/* Symbolleiste im Tastatur-Modus: nur eine Zeile hoch, seitlich scrollbar
-   (statt in mehrere Zeilen umzubrechen) */
-body.kb .kp{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
-body.kb .kg{flex:none}
+/* Symbolleiste im Tastatur-Modus: exakt eine Zeile (40px) hoch, seitlich scrollbar.
+   Feste Höhe + nowrap verhindern, dass iOS die Leiste einrollt oder Gruppen intern
+   umbricht; der Inhalt ragt nach rechts und wird angepuft/gewischt. */
+body.kb .kp{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;height:40px;padding:0 8px}
+body.kb .kg{flex:none;flex-wrap:nowrap;align-items:center}
 
 @media (max-width:860px){
   html,body{height:auto}
