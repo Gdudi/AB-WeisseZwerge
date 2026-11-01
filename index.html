@@ -1,12 +1,16 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Arbeitsblatt Weiße Zwerge</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: Kopfleiste oben, darunter links fest stehende Messwert-Spalte, rechts scrollende Aufgaben mit angeheftetem Formel-Eingabeleiste (iPad quer). */
 :root{
+  color-scheme:light;
   --bg:#EEF1F6; --surface:#FFFFFF; --field:#F6F8FC; --ink:#131C2E; --muted:#576277;
   --line:#D2D9E5; --accent:#1D5FD1; --accent-ink:#FFFFFF; --accent-soft:#E2ECFC; --danger:#B3261E;
   --f-display:'Bricolage Grotesque','Avenir Next','Helvetica Neue',Arial,sans-serif;
@@ -25,7 +29,9 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-html{background:var(--bg)}
+/* Hintergrundfläche-Maßstab und Absicherung der abschließenden Bereiche (viewport-fit=cover, kopf- und fußseitig) */
+html{background:var(--bg);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);scroll-padding-top:env(safe-area-inset-top,0px)}
+img{max-width:100%}
 body{
   height:100vh; height:100dvh;
   -webkit-tap-highlight-color:transparent;
@@ -172,7 +178,8 @@ body.kb .panel{padding-block:8px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.caret{animation:none}}
 </style>
-
+</head>
+<body>
 
 <header class="top">
   <div class="title">
@@ -222,6 +229,16 @@ body.kb .panel{padding-block:8px}
 
 <script>
 (function(){
+/* ============================================================
+   Arbeitsblatt „Weiße Zwerge" — eigenständige Einzeldatei-App
+   ------------------------------------------------------------
+   1. Formel-Eingabemodell (M): Brüche, Hochzahlen, Cursor
+   2. Konfiguration: Aufgaben, Texte, Pflichtfelder
+   3. Formel-Felder UI: Eingabeleiste, Rendering, Cursor-Sitzen
+   4. Aufgaben-Aufbau & Status: Fortschritt, Speichern im localStorage
+   5. iPad-Tastatur: App auf sichtbaren Bereich (visualViewport)
+   6. PDF-Export: eigener PDF-Writer ohne Fremdbibliothek
+   ============================================================ */
 var M=(function(){
   /* Formel-Modell: Folge (Seq) aus Knoten.
      {t:'c',v}  Zeichen | {t:'nl'} Zeilenumbruch
@@ -999,11 +1016,8 @@ var M=(function(){
     return writePdf(pages.map(function(p){return p.c;}),PW.toFixed(2),PH.toFixed(2));
   }
 
-  /* Speichern: in Claude über die Download-Fähigkeit, sonst als normaler Browser-Download */
-  var downloads=null,pdfBtn=$('pdfBtn'),busy=false;
-  var dlReady=(window.claude&&window.claude.use)
-    ?window.claude.use('downloads').then(function(d){downloads=d;}).catch(function(){downloads=null;})
-    :Promise.resolve();
+  /* Speichern: als normaler Browser-Download */
+  var pdfBtn=$('pdfBtn'),busy=false;
   function browserSave(blob,fname){
     var url=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=url;a.download=fname;a.rel='noopener';a.style.display='none';
@@ -1014,18 +1028,13 @@ var M=(function(){
     if(busy)return;
     busy=true;var old=pdfBtn.textContent;pdfBtn.disabled=true;pdfBtn.textContent='PDF wird erstellt …';
     try{
-      await dlReady;
       var blob=await makePdf();
       var nm=val('name').replace(/[^\wäöüÄÖÜß-]+/g,'-').replace(/^-+|-+$/g,'');
       var fname='Weisse-Zwerge-Arbeitsblatt'+(nm?'-'+nm:'')+'.pdf';
-      if(downloads)await downloads.save({filename:fname,data:blob});
-      else browserSave(blob,fname);
+      browserSave(blob,fname);
       toast('PDF gespeichert.');
     }catch(e){
-      var code=e&&e.code;
-      if(code==='declined')toast('Speichern abgebrochen.');
-      else if(code==='rate_limited')toast('Bitte einen Moment warten und noch einmal tippen.');
-      else toast('Das PDF konnte nicht gespeichert werden'+(e&&e.message?' ('+String(e.message).slice(0,80)+')':'')+'.');
+      toast('Das PDF konnte nicht gespeichert werden'+(e&&e.message?' ('+String(e.message).slice(0,80)+')':'')+'.');
     }finally{
       busy=false;pdfBtn.disabled=false;pdfBtn.textContent=old;
     }
