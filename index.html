@@ -25,7 +25,9 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
+html{background:var(--bg)}
 body{
+  height:100vh; height:100dvh;
   margin:0; display:flex; flex-direction:column;
   padding-block:0;
   padding-left:max(16px, env(safe-area-inset-left, 0px));
@@ -38,49 +40,49 @@ button,input,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
 /* Kopfleiste */
-.top{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:12px;border-bottom:1px solid var(--line)}
+.top{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:8px;border-bottom:1px solid var(--line)}
 .title{margin-right:auto;min-width:0}
-.title h1{margin:0;font:700 28px/1.1 var(--f-display);letter-spacing:-.01em;text-wrap:balance}
-.title p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.title h1{margin:0;font:700 24px/1.1 var(--f-display);letter-spacing:-.01em;text-wrap:balance}
+.title p{margin:2px 0 0;color:var(--muted);font-size:13px}
 .who{display:flex;align-items:center;gap:8px}
 .who label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.who input{width:200px;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
-.prog{min-width:150px}
+.who input{width:170px;min-height:42px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.prog{min-width:130px}
 .prog span{display:block;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .bar{height:6px;margin-top:4px;border-radius:3px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
-.btn{min-height:44px;padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500}
+.btn{min-height:42px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 .btn.danger{border-color:var(--danger);color:var(--danger)}
 .btn:disabled{opacity:.55;cursor:not-allowed}
 .btn:active:not(:disabled){transform:translateY(1px)}
 
 /* Zwei Spalten */
-.layout{flex:1;min-height:0;display:grid;grid-template-columns:minmax(330px,384px) minmax(0,1fr);gap:20px;padding-block:16px}
+.layout{flex:1;min-height:0;display:grid;grid-template-columns:minmax(296px,340px) minmax(0,1fr);gap:14px;padding-block:10px}
 aside,main{min-height:0;min-width:0;overflow:auto;-webkit-overflow-scrolling:touch}
-aside{display:flex;flex-direction:column;gap:14px}
-main{display:flex;flex-direction:column;gap:14px;padding-bottom:24px;scroll-padding-top:130px}
+aside{display:flex;flex-direction:column;gap:10px}
+main{display:flex;flex-direction:column;gap:12px;padding-bottom:16px;scroll-padding-top:120px}
 
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
 .panel h2{margin:0 0 8px;font:600 12px/1.3 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.formulas{display:grid;gap:6px;font-family:var(--f-data);font-size:16px}
+.formulas{display:grid;gap:5px;font-family:var(--f-data);font-size:15px}
 .formulas div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .formulas small{font:400 12px var(--f-body);color:var(--muted)}
 .fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 .2em}
 .fr>span:first-child{border-bottom:1px solid currentColor;padding:0 .25em}
 
-table.data{width:100%;border-collapse:collapse;font-size:14px}
+table.data{width:100%;border-collapse:collapse;font-size:13px}
 table.data th{font:600 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:0 6px 6px 0}
-table.data td{padding:7px 6px 7px 0;border-top:1px solid var(--line);vertical-align:top}
+table.data td{padding:4px 6px 4px 0;border-top:1px solid var(--line);vertical-align:top}
 table.data td:nth-child(2){font-family:var(--f-data);color:var(--accent);white-space:nowrap;padding-right:10px}
 table.data td:nth-child(3){font-family:var(--f-data);font-size:13px}
 table.data tr.own td{background:var(--accent-soft)}
 table.data tr.own td:first-child{padding-left:6px}
 
 /* Eingabeleiste für Formeln (bleibt oben in der Aufgabenspalte stehen) */
-.kp{position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;gap:6px 16px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 16px rgba(10,20,40,.10)}
+.kp{position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;gap:6px 12px;padding:6px 8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 16px rgba(10,20,40,.10)}
 .kg{display:flex;flex-wrap:wrap;gap:6px}
-.kb{min-width:46px;height:44px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);
+.kb{min-width:44px;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);
   font:500 18px/1 var(--f-data);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
   touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .kb:active{background:var(--accent-soft);border-color:var(--accent)}
@@ -92,10 +94,10 @@ table.data tr.own td:first-child{padding-left:6px}
 /* Formel-Felder */
 .mf{position:relative;display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--field);cursor:text}
 .mf.on{border-color:var(--accent);outline:3px solid var(--accent-soft)}
-.mfv{position:relative;padding:10px 14px;min-height:48px;font:400 18px/1.5 var(--f-data);overflow-wrap:anywhere;
+.mfv{position:relative;padding:8px 12px;min-height:42px;font:400 16px/1.5 var(--f-data);overflow-wrap:anywhere;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.mf.ml .mfv{min-height:88px}
-.mfv.empty::after{content:attr(data-ph);position:absolute;left:18px;top:12px;font:400 15px var(--f-body);color:var(--muted);pointer-events:none}
+.mf.ml .mfv{min-height:70px}
+.mfv.empty::after{content:attr(data-ph);position:absolute;left:14px;top:10px;font:400 15px var(--f-body);color:var(--muted);pointer-events:none}
 .mfi{position:absolute;inset:0;width:100%;height:100%;z-index:2;margin:0;padding:0;border:0;background:transparent;
   opacity:0;color:transparent;caret-color:transparent;font-size:16px}
 /* Bausteine einer Formel (auch im PDF verwendet) */
@@ -111,15 +113,15 @@ table.data tr.own td:first-child{padding-left:6px}
 /* Aufgaben */
 .intro p{margin:0 0 6px}
 .intro p:last-child{margin:0;color:var(--muted);font-size:14px}
-.sec{margin:10px 0 0;font:700 22px/1.2 var(--f-display);letter-spacing:-.005em}
+.sec{margin:10px 0 0;font:700 19px/1.2 var(--f-display);letter-spacing:-.005em}
 .sec+.note{margin:-6px 0 0;color:var(--muted)}
-.task{display:grid;grid-template-columns:40px minmax(0,1fr);gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
-.tl{font:700 22px/1 var(--f-display);color:var(--accent)}
+.task{display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.tl{font:700 20px/1 var(--f-display);color:var(--accent)}
 .tb{min-width:0;display:flex;flex-direction:column;gap:12px}
 .q{margin:0;font-weight:500}
 .way .lbl{display:block;margin-bottom:4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--field);padding:10px 12px;display:block;resize:vertical;line-height:1.5}
-.answer textarea{min-height:150px}
+.answer textarea{min-height:110px}
 .res{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .res .sym{font:500 20px var(--f-data);min-width:44px}
 .res .sym.wide{font:500 15px var(--f-body);min-width:0}
@@ -133,6 +135,14 @@ textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:va
 .toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;
   background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:15px;transition:.2s;z-index:20;max-width:90vw;text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* Bei geöffneter Bildschirmtastatur (Klasse .kb wird per JS gesetzt): engere Abstände,
+   damit Kopfleiste, Eingabeleiste und das aktuelle Feld auf dem kleinen verbleibenden
+   Bereich des iPads sichtbar bleiben. */
+body.kb .top{padding-block:5px}
+body.kb .layout{padding-block:6px;gap:12px}
+body.kb .task{padding:10px 12px}
+body.kb .panel{padding:8px 12px}
 
 @media (max-width:860px){
   html,body{height:auto}
@@ -569,7 +579,7 @@ var M=(function(){
   }
   function grow(el){
     el.style.height='auto';
-    el.style.height=Math.max(150,el.scrollHeight+2)+'px';
+    el.style.height=Math.max(110,el.scrollHeight+2)+'px';
   }
   function progress(){
     var n=REQUIRED.filter(function(id){return !FIELDS[id].empty();}).length;
@@ -586,6 +596,51 @@ var M=(function(){
     if(t.classList&&t.classList.contains('mfi'))return;
     progress();save();
   });
+
+  /* iPad-Bildschirmtastatur: iOS legt die Tastatur ÜBER die Seite (Layouthöhe bleibt
+     unverändert). Solange ein Eingabefeld fokussiert ist, wird die App-Höhe deshalb an
+     den sichtbaren Bereich (visualViewport) angepasst: Kopfleiste bleibt oben sichtbar,
+     die Spalten darunter scrollen im verbleibenden Raum, nichts wird verdeckt. Der
+     offsetTop-Ausgleich fängt das automatische Weiter-Schieben der Ansicht durch iOS ab. */
+  var vv=window.visualViewport,isTouch=('ontouchstart' in window),kbField=false;
+  function revealField(){
+    var el=document.activeElement;
+    if(!el||el===document.body)return;
+    var box=(el.classList&&el.classList.contains('mfi'))?el.parentElement:el;
+    try{box.scrollIntoView({block:'nearest'});}catch(e){if(box.scrollIntoView)box.scrollIntoView();}
+  }
+  function fitKb(){
+    if(!vv)return;
+    if(kbField&&isTouch){
+      document.body.style.height=vv.height+'px';
+      /* offsetTop-Ausgleich nur, wenn das Dokument selbst nicht scrollen kann
+         (Querformat/App-Ansicht). Im Hochformat scrollt iOS die Seite von selbst. */
+      var fits=document.documentElement.scrollHeight<=window.innerHeight+2;
+      document.body.style.transform=(fits&&vv.offsetTop>0)?'translateY('+vv.offsetTop+'px)':'none';
+      document.body.classList.toggle('kb',vv.height<window.innerHeight-40);
+    }else{
+      document.body.style.height='';
+      document.body.style.transform='';
+      document.body.classList.remove('kb');
+    }
+  }
+  if(vv&&isTouch){
+    vv.addEventListener('resize',fitKb);
+    vv.addEventListener('scroll',fitKb);
+    document.addEventListener('focusin',function(e){
+      var t=e.target;
+      if(t&&((t.tagName==='INPUT'&&t.type==='text')||t.tagName==='TEXTAREA')){
+        kbField=true;
+        setTimeout(fitKb,80);setTimeout(fitKb,400);
+        setTimeout(revealField,380);setTimeout(revealField,900);
+      }
+    });
+    document.addEventListener('focusout',function(){
+      kbField=false;
+      setTimeout(fitKb,200);
+      setTimeout(fitKb,600);
+    });
+  }
 
   /* Eingabeleiste bedienen, ohne das Feld zu verlassen */
   var kp=$('kp');
