@@ -146,11 +146,16 @@ textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:va
    unverändert, damit nichts seitlich springt oder schmaler wird. */
 body.kb .top{padding-block:3px}
 body.kb .top .title p{display:none}
+/* Kopfzeile bleibt in einer Zeile über die volle Breite (nur bei breiten Layouts) */
 body.kb .who input{min-height:34px;padding-block:3px}
-body.kb .btn{min-height:34px;padding-block:2px}
+body.kb .who input::placeholder{font-size:13px}
+body.kb .btn{min-height:34px;padding-block:2px;font-size:13px}
 body.kb .layout{padding-block:6px;row-gap:12px}
 body.kb .task{padding-block:10px}
 body.kb .panel{padding-block:8px}
+@media (min-width:800px){
+  body.kb .top{flex-wrap:nowrap}
+}
 
 @media (max-width:860px){
   html,body{height:auto}
