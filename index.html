@@ -144,7 +144,8 @@ textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:va
 /* Bei geöffneter Bildschirmtastatur (Klasse .kb wird per JS gesetzt): nur vertikal
    enger (Höhe!), horizontale Maße (Textbreite, Feld-/Knopfbreiten, Abstände) bleiben
    unverändert, damit nichts seitlich springt oder schmaler wird. */
-body.kb .top{padding-block:3px}
+body.kb .top{padding-block:3px;justify-content:space-between}
+body.kb .title{margin-right:0}
 body.kb .top .title p{display:none}
 /* Kopfzeile bleibt in einer Zeile über die volle Breite (nur bei breiten Layouts) */
 body.kb .who input{min-height:34px;padding-block:3px}
@@ -640,6 +641,10 @@ var M=(function(){
         /* 4px-Stille: Kleines Wackeln des visuellen Viewports soll nicht die ganze
            App neu zeichnen (flackern beim Tippen auf die Symbole). */
         setSt(document.body,'transform',off>3?'translateY('+off+'px)':'none');
+        /* Hartes Anlegen an oben/links: Verschiebungen der Ansicht (z. B. seitliches
+           Weggleiten durch iOS beim Öffnen der Tastatur) sofort zurücksetzen */
+        if(window.scrollX||window.scrollY)window.scrollTo(0,0);
+        if(root.scrollLeft)root.scrollLeft=0;
       }else{
         setSt(root,'height','');setSt(root,'overflow','');
         setSt(document.body,'transform','none');
