@@ -13,6 +13,7 @@
   color-scheme:light;
   --bg:#EEF1F6; --surface:#FFFFFF; --field:#F6F8FC; --ink:#131C2E; --muted:#576277;
   --line:#D2D9E5; --accent:#1D5FD1; --accent-ink:#FFFFFF; --accent-soft:#E2ECFC; --danger:#B3261E;
+  --ok:#17692F; --ok-soft:#E3F4E8; --warn:#8A5200; --warn-soft:#FDF0D9; --danger-soft:#FBE7E5;
   --f-display:'Bricolage Grotesque','Avenir Next','Helvetica Neue',Arial,sans-serif;
   --f-body:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;
   --f-data:'IBM Plex Mono',ui-monospace,Menlo,monospace;
@@ -20,18 +21,20 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0B111B; --surface:#141C2A; --field:#0E1521; --ink:#E6EBF4; --muted:#93A0B6;
-    --line:#29344A; --accent:#6FA6FF; --accent-ink:#0B111B; --accent-soft:#1A2A47; --danger:#FF8A80; color-scheme:dark;
+    --line:#29344A; --accent:#6FA6FF; --accent-ink:#0B111B; --accent-soft:#1A2A47; --danger:#FF8A80; --ok:#7FD99A; --ok-soft:#14301F; --warn:#F2C26B; --warn-soft:#33270F; --danger-soft:#3A1917; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0B111B; --surface:#141C2A; --field:#0E1521; --ink:#E6EBF4; --muted:#93A0B6;
-  --line:#29344A; --accent:#6FA6FF; --accent-ink:#0B111B; --accent-soft:#1A2A47; --danger:#FF8A80; color-scheme:dark;
+  --line:#29344A; --accent:#6FA6FF; --accent-ink:#0B111B; --accent-soft:#1A2A47; --danger:#FF8A80; --ok:#7FD99A; --ok-soft:#14301F; --warn:#F2C26B; --warn-soft:#33270F; --danger-soft:#3A1917; color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 /* Hintergrundfläche-Maßstab und Absicherung der abschließenden Bereiche (viewport-fit=cover, kopf- und fußseitig) */
 html{background:var(--bg);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);scroll-padding-top:env(safe-area-inset-top,0px)}
 img{max-width:100%}
+/* Einheitliche Hochzahlen (statt Unicode-Zeichen ²³⁰…, die je nach Schrift verschieden aussehen) */
+sup{font-size:.72em;line-height:0;position:relative;top:-.5em;vertical-align:baseline}
 body{
   height:100vh; height:100dvh;
   -webkit-tap-highlight-color:transparent;
@@ -171,24 +174,43 @@ body.kbm .panel{padding-block:8px}
 @media (min-width:800px){
   body.kbm .top{flex-wrap:nowrap}
 }
-/* Symbolleiste im Tastatur-Modus: per JS ans Dokumentende umgehängt und zurück.
-   Im flexiblen Body-Layout sitzt sie so direkt über der Tastatur — ganz ohne
-   position:fixed/sticky (iOS reißt sticky unter der Körper-Transform ab).
-   width:auto + min-width:0 ist PFLICHT: Der Flex-Grundwert min-width:auto würde
-   die Leiste sonst mindestens so breit machen wie ihren gesamten Inhalt — das
-   ganze Dokument würde breiter als der Bildschirm und ließe sich nicht mehr
-   seitlich in Position bringen. */
-body.kbm .kp{position:static;flex:none;margin:0 10px 6px;height:44px;padding:0 8px;width:auto;min-width:0;
-  flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden}
+/* Tastatur-Modus (Klasse .kbm auf html und body; per JS gesetzt, solange die
+   Bildschirmtastatur wirklich sichtbar ist). Der Body wird zu einer festen Fläche exakt
+   so groß wie der sichtbare Bereich (top/height kommen per JS aus visualViewport).
+   Das Dokument selbst kann dann nicht mehr scrollen – es gibt keinen leeren Hintergrund
+   unter dem Inhalt. Gescrollt wird nur in den Spalten (Querformat) bzw. in .layout (Hochformat).
+   Die Symbolleiste bleibt an ihrem Platz im DOM (kein Umhängen mehr) und wird per
+   position:absolute am unteren Rand des festen Bodys angedockt (Body = Containing Block). */
+html.kbm{overflow:hidden}
+body.kbm{position:fixed;left:0;right:0;width:auto;max-width:none;overflow:hidden;
+  padding-top:env(safe-area-inset-top,0px);overscroll-behavior:none}
+body.kbm .layout{padding-bottom:60px}
+body.kbm main,body.kbm aside,body.kbm .layout{scroll-padding-top:12px;scroll-padding-bottom:68px;overscroll-behavior:contain}
+body.kbm .kp{position:absolute;top:auto;left:16px;right:16px;bottom:6px;z-index:30;height:44px;margin:0;padding:0 8px;
+  width:auto;min-width:0;max-width:none;align-items:center;flex-wrap:nowrap;
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 body.kbm .kg{flex:none;flex-wrap:nowrap;align-items:center}
-body.kbm .kp{max-width:100%;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
-body.kbm{overflow-x:hidden;max-width:100vw}
-body.kbm .toast{bottom:60px}
+body.kbm .toast{position:absolute;bottom:60px}
+
+/* Selbstkontrolle */
+.chkrow{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.chkbar{display:flex;flex-wrap:wrap;gap:8px}
+.btn.sm{min-height:36px;padding:4px 12px;font-size:14px}
+.chk{display:grid;gap:6px;width:100%}
+.chk:empty{display:none}
+.chk>.solbtn{justify-self:start}
+.cl{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border-radius:8px;border:1px solid var(--line);font-size:14.5px;line-height:1.4;background:var(--field);color:var(--ink)}
+.cl .ci{flex:none;width:1.3em;text-align:center;font-weight:700}
+.cl em{display:block;font-style:normal;color:var(--muted);font-size:13px}
+.cl.ok{background:var(--ok-soft);border-color:var(--ok)}   .cl.ok .ci{color:var(--ok)}
+.cl.warn{background:var(--warn-soft);border-color:var(--warn)} .cl.warn .ci{color:var(--warn)}
+.cl.bad{background:var(--danger-soft);border-color:var(--danger)} .cl.bad .ci{color:var(--danger)}
 
 @media (max-width:860px){
   html,body{height:auto}
   .layout{display:block}
   aside,main{overflow:visible}
+  body.kbm .layout{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
   aside{margin-bottom:14px}
   .kp{top:env(safe-area-inset-top,0px)}
   .who input{width:150px}
@@ -214,11 +236,11 @@ body.kbm .toast{bottom:60px}
       <h2>Benötigte Formeln</h2>
       <div class="formulas">
         <div><span>Volumen einer Kugel:</span></div>
-        <div>V = <span class="fr"><span>4</span><span>3</span></span> π R³</div>
+        <div><span>V = <span class="fr"><span>4</span><span>3</span></span> π R<sup>3</sup></span></div>
         <div><small>Mittlere Dichte:</small></div>
-        <div>ρ = <span class="fr"><span>M</span><span>V</span></span></div>
+        <div><span>ρ = <span class="fr"><span>M</span><span>V</span></span></span></div>
         <div><small>Oberflächengravitation:</small></div>
-        <div>g = <span class="fr"><span>G M</span><span>R²</span></span></div>
+        <div><span>g = <span class="fr"><span>G M</span><span>R<sup>2</sup></span></span></span></div>
       </div>
     </section>
     <section class="panel">
@@ -228,12 +250,12 @@ body.kbm .toast{bottom:60px}
         <tbody>
           <tr class="own"><td>Masse von Sirius B</td><td>M</td><td>1,018 Sonnenmassen (M☉)</td></tr>
           <tr class="own"><td>Radius von Sirius B</td><td>R</td><td>0,008098 Sonnenradien (R☉)</td></tr>
-          <tr><td>Sonnenmasse</td><td>M☉</td><td>1,9885 × 10³⁰ kg</td></tr>
-          <tr><td>Sonnenradius</td><td>R☉</td><td>6,957 × 10⁸ m</td></tr>
-          <tr><td>Erdradius</td><td>R⊕</td><td>6,371 × 10⁶ m</td></tr>
-          <tr><td>Mittlere Erddichte</td><td>ρ⊕</td><td>5,51 × 10³ kg/m³</td></tr>
-          <tr><td>Erdbeschleunigung</td><td>g⊕</td><td>9,81 m/s²</td></tr>
-          <tr><td>Gravitationskonstante</td><td>G</td><td>6,674 × 10⁻¹¹ m³ kg⁻¹ s⁻²</td></tr>
+          <tr><td>Sonnenmasse</td><td>M☉</td><td>1,9885 × 10<sup>30</sup> kg</td></tr>
+          <tr><td>Sonnenradius</td><td>R☉</td><td>6,957 × 10<sup>8</sup> m</td></tr>
+          <tr><td>Erdradius</td><td>R⊕</td><td>6,371 × 10<sup>6</sup> m</td></tr>
+          <tr><td>Mittlere Erddichte</td><td>ρ⊕</td><td>5,51 × 10<sup>3</sup> kg/m<sup>3</sup></td></tr>
+          <tr><td>Erdbeschleunigung</td><td>g⊕</td><td>9,81 m/s<sup>2</sup></td></tr>
+          <tr><td>Gravitationskonstante</td><td>G</td><td>6,674 × 10<sup>−11</sup> m<sup>3</sup> kg<sup>−1</sup> s<sup>−2</sup></td></tr>
         </tbody>
       </table>
     </section>
@@ -418,11 +440,26 @@ var M=(function(){
   var REQUIRED=['calc-a-res','calc-b-res','calc-c-res','calc-d-res','calc-d-cmp','calc-e-res','calc-e-cmp','text-a','text-b','text-c'];
   var AUFTRAG='Rechnet mit den veröffentlichten Messwerten für Sirius B. Notiert Rechenweg und Einheiten. Rundet eure Ergebnisse sinnvoll.';
   var AUSW='Beantwortet die Fragen in ganzen Sätzen. Bezieht euch auf eure berechneten Werte.';
-  var TIPP='Eingabehilfe: Mit der Leiste oben setzt du Brüche, Hochzahlen, π und Rechenzeichen. Auf der Tastatur erzeugt „/“ einen Bruch und „^“ eine Hochzahl. Mit den Pfeilen oder „→“ verlässt du Zähler, Nenner und Hochzahl.';
+  var TIPP='Eingabehilfe: Mit der Eingabeleiste (bei geöffneter Tastatur sitzt sie direkt darüber) setzt du Brüche, Hochzahlen, π und Rechenzeichen. Auf der Tastatur erzeugt „/“ einen Bruch und „^“ eine Hochzahl. Mit den Pfeilen oder „→“ verlässt du Zähler, Nenner und Hochzahl. Unter jeder Rechnung kannst du dein Ergebnis mit „Ergebnis prüfen“ kontrollieren.';
   var QUELLEN='Bond, H. E. et al. (2017), The Astrophysical Journal, 840, 70. DOI: 10.3847/1538-4357/aa6af8. | Bédard, A. et al. (2019), Monthly Notices of the Royal Astronomical Society, 484, 2711–2725. DOI: 10.1093/mnras/sty3395.';
   var KEY='weisse-zwerge-sirius-b-v2';
 
+  /* Hochzahlen: Unicode-Zeichen (²³⁰⁻ …) werden überall einheitlich als echte Hochzahl dargestellt */
+  var SUP_U='⁰¹²³⁴⁵⁶⁷⁸⁹⁻',SUP_N='0123456789−',SUP_RE=/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+/g;
+  function supPlain(m){return m.split('').map(function(c){return SUP_N.charAt(SUP_U.indexOf(c));}).join('');}
+  function toSupUni(t){return t.split('').map(function(c){var k=SUP_N.indexOf(c==='-'?'−':c);return k<0?c:SUP_U.charAt(k);}).join('');}
+  function chars(t){return t.split('').map(function(c){return {t:'c',v:c};});}
+  function richSeq(t){
+    var out=[],re=/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+/g,last=0,m;
+    while((m=re.exec(t))){
+      out=out.concat(chars(t.slice(last,m.index)));
+      out.push({t:'sup',s:chars(supPlain(m[0]))});
+      last=re.lastIndex;
+    }
+    return out.concat(chars(t.slice(last)));
+  }
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function supHtml(t){return esc(t).replace(SUP_RE,function(m){return '<sup>'+supPlain(m)+'</sup>';});}
   function $(id){return document.getElementById(id);}
 
   /* Eingabeleiste */
@@ -510,7 +547,7 @@ var M=(function(){
       renderSeq(ed.root,view,focused?{seq:ed.seq,i:ed.i}:null,false);
       view.classList.toggle('empty',ed.root.length===0);
     }
-    function changed(){draw();onChange();}
+    function changed(){draw();onChange(id);}
     function doAct(a){
       if(a.indexOf('ch:')===0)M.typeChar(ed,a.slice(3));
       else switch(a){
@@ -539,6 +576,7 @@ var M=(function(){
     function feed(){
       var s=inp.value;inp.value='';
       if(!s)return;
+      s=s.replace(SUP_RE,function(m){return '^'+supPlain(m);});
       for(var k=0;k<s.length;k++){
         var ch=s.charAt(k);
         if(ch==='\n'&&!ml)continue;
@@ -581,9 +619,13 @@ var M=(function(){
     return '<section class="task" aria-labelledby="q-c'+t.id+'"><div class="tl">'+t.id+')</div><div class="tb">'+
       '<p class="q" id="q-c'+t.id+'">'+t.q+'</p>'+
       '<div class="way"><span class="lbl">Rechenweg</span>'+mfHTML('calc-'+t.id+'-way',true,'Rechenweg mit Einheiten notieren','Rechenweg '+t.id)+'</div>'+
-      '<div class="res"><span class="sym">'+t.sym+' =</span>'+mfHTML('calc-'+t.id+'-res',false,'Ergebnis','Ergebnis '+t.sym+' in '+t.unit)+'<span class="unit">'+t.unit+'</span></div>'+
+      '<div class="res"><span class="sym">'+t.sym+' =</span>'+mfHTML('calc-'+t.id+'-res',false,'Ergebnis','Ergebnis '+t.sym+' in '+t.unit)+'<span class="unit">'+supHtml(t.unit)+'</span></div>'+
       (t.cmp?'<div class="res cmp"><span class="sym wide">Vergleich mit der Erde: '+t.cmp+'</span>'+mfHTML('calc-'+t.id+'-cmp',false,'Ergebnis','Vergleich mit der Erde')+'</div>':'')+
-      '</div></section>';
+      chkHTML(t.id)+'</div></section>';
+  }
+  function chkHTML(id){
+    return '<div class="chkrow"><div class="chkbar"><button type="button" class="btn sm chkbtn" data-id="'+id+'">Ergebnis prüfen</button></div>'+
+      '<div class="chk" id="chk-'+id+'" role="status" aria-live="polite"></div></div>';
   }
   function textHTML(t){
     return '<section class="task answer" aria-labelledby="q-t'+t.id+'"><div class="tl">'+t.id+')</div><div class="tb">'+
@@ -596,7 +638,7 @@ var M=(function(){
     '<h2 class="sec">1. Vorbetrachtungen und Berechnungen</h2>'+CALC.map(calcHTML).join('')+
     '<h2 class="sec">2. Auswertung</h2><p class="note">'+AUSW+'</p>'+TEXTS.map(textHTML).join('')+
     '<div class="foot"><p class="src"><strong>Quellen zu den Messwerten</strong><br>'+QUELLEN+'</p>'+
-    '<button class="btn primary" id="pdfBtn" type="button">Als PDF speichern</button></div>';
+    '<div class="chkbar"><button class="btn" id="chkAllBtn" type="button">Alle Ergebnisse prüfen</button><button class="btn primary" id="pdfBtn" type="button">Als PDF speichern</button></div></div>';
 
   CALC.forEach(function(t){
     initMath('calc-'+t.id+'-way',true);
@@ -614,6 +656,220 @@ var M=(function(){
   plain('name');
   TEXTS.forEach(function(t){plain('text-'+t.id);});
   function val(id){return FIELDS[id].get().trim();}
+
+  /* ============================================================
+     Selbstkontrolle: Ergebnisfelder werden in Zahlen umgerechnet und mit den Sollwerten
+     (aus den Beobachtungsdaten berechnet) verglichen.
+     ============================================================ */
+  var D={Ms:1.9885e30,Rs:6.957e8,rhoE:5.51e3,gE:9.81,G:6.674e-11};
+  D.M=1.018*D.Ms;D.R=0.008098*D.Rs;
+  D.V=4/3*Math.PI*Math.pow(D.R,3);D.rho=D.M/D.V;D.g=D.G*D.M/(D.R*D.R);
+  var TOL=0.03,TOL2=0.10;
+
+  /* Formel-Modell -> Zeichenliste (Bruch = ((Zähler)/(Nenner)), Hochzahl = ^(…)) */
+  function flatSeq(seq,out){
+    for(var k=0;k<seq.length;k++){
+      var nd=seq[k];
+      if(nd.t==='c')out.push(nd.v);
+      else if(nd.t==='nl')out.push(' ');
+      else if(nd.t==='fr'){out.push('(','(');flatSeq(nd.n,out);out.push(')','/','(');flatSeq(nd.d,out);out.push(')',')');}
+      else{out.push('^','(');flatSeq(nd.s,out);out.push(')');}
+    }
+    return out;
+  }
+  function tokenize(fl){
+    var t=[],n=fl.length,i,c,depth=0,cut=-1,space=false;
+    for(i=0;i<n;i++){c=fl[i];if(c==='(')depth++;else if(c===')')depth--;else if(depth===0&&(c==='='||c==='≈'))cut=i;}
+    i=cut+1;
+    while(i<n){
+      c=fl[i];
+      if(c===' '){space=true;i++;continue;}
+      if(/[0-9]/.test(c)||((c===','||c==='.')&&i+1<n&&/[0-9]/.test(fl[i+1]))){
+        if(space&&t.length&&t[t.length-1].t==='n')return {err:'space'};
+        var num='';
+        while(i<n&&/[0-9,.]/.test(fl[i])){num+=fl[i]===','?'.':fl[i];i++;}
+        if((num.match(/\./g)||[]).length>1)return {err:'syntax'};
+        t.push({t:'n',v:parseFloat(num)});space=false;continue;
+      }
+      space=false;
+      if(c==='+')t.push({t:'o',v:'+'});
+      else if(c==='−'||c==='-')t.push({t:'o',v:'-'});
+      else if(c==='·'||c==='×'||c==='*')t.push({t:'o',v:'*'});
+      else if(c==='÷'||c==='/')t.push({t:'o',v:'/'});
+      else if(c==='^')t.push({t:'o',v:'^'});
+      else if(c==='(')t.push({t:'('});
+      else if(c===')')t.push({t:')'});
+      else if(c==='π')t.push({t:'pi'});
+      else return {toks:t,unit:fl.slice(i).join('')};   /* ab dem ersten Buchstaben: Einheit */
+      i++;
+    }
+    return {toks:t,unit:''};
+  }
+  function parseTokens(t){
+    var p=0;
+    function peek(){return t[p];}
+    function atomStart(x){return !!x&&(x.t==='n'||x.t==='pi'||x.t==='(');}
+    function expr(){
+      var v=term(),x;
+      while((x=peek())&&x.t==='o'&&(x.v==='+'||x.v==='-')){p++;var r=term();v=x.v==='+'?v+r:v-r;}
+      return v;
+    }
+    function term(){
+      var v=unary(),x;
+      for(;;){
+        x=peek();
+        if(x&&x.t==='o'&&(x.v==='*'||x.v==='/')){p++;var r=unary();v=x.v==='*'?v*r:v/r;}
+        else if(atomStart(x)){v*=unary();}
+        else break;
+      }
+      return v;
+    }
+    function unary(){
+      var x=peek();
+      if(x&&x.t==='o'&&(x.v==='-'||x.v==='+')){p++;var u=unary();return x.v==='-'?-u:u;}
+      return power();
+    }
+    function power(){
+      var b=atom(),x=peek();
+      if(x&&x.t==='o'&&x.v==='^'){p++;return Math.pow(b,expo());}
+      return b;
+    }
+    function expo(){
+      var x=peek();
+      if(x&&x.t==='o'&&(x.v==='-'||x.v==='+')){p++;var e=expo();return x.v==='-'?-e:e;}
+      return atom();
+    }
+    function atom(){
+      var x=t[p++];
+      if(!x)throw 0;
+      if(x.t==='n')return x.v;
+      if(x.t==='pi')return Math.PI;
+      if(x.t==='('){var v=expr();if(!peek()||peek().t!==')')throw 0;p++;return v;}
+      throw 0;
+    }
+    var v=expr();
+    if(p<t.length)throw 0;
+    return v;
+  }
+  function evalSeq(seq){
+    if(M.blank(seq))return {err:'empty'};
+    var tk=tokenize(flatSeq(seq,[])),v;
+    if(tk.err)return {err:tk.err};
+    if(!tk.toks.length)return {err:'syntax'};
+    try{v=parseTokens(tk.toks);}catch(e){return {err:'syntax'};}
+    if(typeof v!=='number'||!isFinite(v))return {err:'syntax'};
+    return {value:v,unit:tk.unit};
+  }
+
+  /* Formatierung (deutsch) */
+  function sciHtml(x){
+    var e=Math.floor(Math.log10(Math.abs(x))),m=x/Math.pow(10,e),ms=m.toPrecision(4);
+    if(parseFloat(ms)>=10){m/=10;e++;ms=m.toPrecision(4);}
+    if(e>=-2&&e<=3)return String(parseFloat(x.toPrecision(4))).replace('.',',');
+    ms=ms.replace('.',',').replace(/,?0+$/,'');
+    return ms+' × 10<sup>'+(e<0?'−'+(-e):e)+'</sup>';
+  }
+  function fmtPct(d){var v=d*100;return (v<10?v.toFixed(1):v.toFixed(0)).replace('.',',');}
+  function fmtFac(f){return f<100?String(parseFloat(f.toPrecision(2))).replace('.',','):sciHtml(f);}
+  function normUnit(u){return u.replace(/\^\(([^()]*)\)/g,'^$1').replace(/[()\s·]/g,'');}
+  function unitNote(it,res){
+    if(!res.unit)return '';
+    var want=normUnit(it.unit.replace(SUP_RE,function(m){return '^'+supPlain(m);}));
+    var got=normUnit(res.unit);
+    if(got===want)return '';
+    return it.unit?'Hinweis: Die Einheit steht schon neben dem Feld ('+supHtml(it.unit)+'). Deine Angabe „'+esc(got)+'“ passt nicht dazu.'
+                  :'Hinweis: Dieser Vergleichswert hat keine Einheit.';
+  }
+
+  /* Sollwerte und typische Fehler je Aufgabe */
+  var CHK={
+    a:[{f:'calc-a-res',ref:D.M,unit:'kg',raw:1.018,rawMsg:'Hier steht noch der Wert in Sonnenmassen. Rechne mit der Sonnenmasse in kg um.'}],
+    b:[{f:'calc-b-res',ref:D.R,unit:'m',raw:0.008098,rawMsg:'Hier steht noch der Wert in Sonnenradien. Rechne mit dem Sonnenradius in m um.'}],
+    c:[{f:'calc-c-res',ref:D.V,unit:'m³',prev:'Aufgabe b)',
+        own:function(v){return v.b>0?4/3*Math.PI*Math.pow(v.b,3):null;},
+        factors:[[0.75,'Hast du den Faktor 4/3 in der Formel vergessen?'],[1/Math.PI,'Hast du π vergessen?'],[0.75/Math.PI,'Hast du 4/3 und π vergessen?'],[8,'Hast du den Durchmesser statt des Radius eingesetzt?']]}],
+    d:[{f:'calc-d-res',ref:D.rho,unit:'kg/m³',label:'Dichte',prev:'Aufgabe a) und c)',
+        own:function(v){return v.a>0&&v.c>0?v.a/v.c:null;}},
+       {f:'calc-d-cmp',ref:D.rho/D.rhoE,unit:'',label:'Vergleich mit der Erde',prev:'die Dichte darüber',
+        own:function(v){return v.dres>0?v.dres/D.rhoE:null;}}],
+    e:[{f:'calc-e-res',ref:D.g,unit:'m/s²',label:'Gravitation',prev:'Aufgabe a) und b)',
+        own:function(v){return v.a>0&&v.b>0?D.G*v.a/(v.b*v.b):null;},
+        factors:[[D.R,'Hast du durch R statt durch R² geteilt?'],[1/D.G,'Hast du die Gravitationskonstante G vergessen?']]},
+       {f:'calc-e-cmp',ref:D.g/D.gE,unit:'',label:'Vergleich mit der Erde',prev:'die Gravitation darüber',
+        own:function(v){return v.eres>0?v.eres/D.gE:null;}}]
+  };
+  var CHK_IDS=['a','b','c','d','e'];
+
+  function gatherVals(){
+    function g(id){var r=evalSeq(FIELDS[id].seq());return r.err?null:r.value;}
+    return {a:g('calc-a-res'),b:g('calc-b-res'),c:g('calc-c-res'),dres:g('calc-d-res'),eres:g('calc-e-res')};
+  }
+  function judge(it,res,vals){
+    if(res.err==='empty')return {cls:'info',icon:'…',msg:'Hier fehlt noch ein Ergebnis.'};
+    if(res.err==='space')return {cls:'info',icon:'?',msg:'In der Zahl steht ein Leerzeichen. Schreibe sie ohne Leerzeichen.'};
+    if(res.err)return {cls:'info',icon:'?',msg:'Das kann ich nicht auswerten. Schreibe nur die Zahl, z. B. 2,02 × 10<sup>30</sup> (Taste „×10ⁿ“ in der Leiste).'};
+    var x=res.value,r=x/it.ref,dev=Math.abs(r-1),note=unitNote(it,res);
+    if(!(x>0))return {cls:'bad',icon:'✗',msg:'Das Ergebnis muss größer als 0 sein.',note:note};
+    if(dev<=TOL)return {cls:'ok',icon:'✓',msg:dev>=0.0005?'Stimmt (Abweichung '+fmtPct(dev)+' %).':'Stimmt.',note:note};
+    if(dev<=TOL2)return {cls:'warn',icon:'≈',msg:'Fast richtig (Abweichung '+fmtPct(dev)+' %). Hast du zwischendurch zu stark gerundet?',note:note};
+    if(it.raw&&Math.abs(x/it.raw-1)<=TOL)return {cls:'bad',icon:'✗',msg:it.rawMsg,note:note};
+    var own=it.own?it.own(vals):null;
+    if(own&&isFinite(own)&&Math.abs(x/own-1)<=TOL)
+      return {cls:'warn',icon:'≈',msg:'Dein Rechenschritt passt zu deinen eigenen Werten, aber ein Wert davor weicht ab. Prüfe zuerst '+it.prev+'.',note:note};
+    var lr=Math.log10(r),k=Math.round(lr);
+    if(k!==0&&Math.abs(lr-k)<=0.02)
+      return {cls:'warn',icon:'≈',msg:'Die Ziffern passen, aber die Zehnerpotenz nicht: Dein Wert ist um 10<sup>'+Math.abs(k)+'</sup> zu '+(k>0?'groß':'klein')+'.',note:note};
+    var fs=it.factors||[];
+    for(var i=0;i<fs.length;i++){if(Math.abs(r/fs[i][0]-1)<=0.05)return {cls:'bad',icon:'✗',msg:fs[i][1],note:note};}
+    var f=r>1?r:1/r;
+    return {cls:'bad',icon:'✗',msg:'Weicht deutlich ab (etwa Faktor '+fmtFac(f)+' zu '+(r>1?'groß':'klein')+'). Prüfe Formel, Einheiten und Zehnerpotenz.',note:note};
+  }
+  function runCheck(id){
+    var items=CHK[id],vals=gatherVals(),res=[],lines=[],needSol=false,good=0;
+    items.forEach(function(it){
+      var j=judge(it,evalSeq(FIELDS[it.f].seq()),vals);
+      res.push(j);
+      if(j.cls==='ok')good++;
+      if(j.cls==='bad'||j.cls==='warn')needSol=true;
+      lines.push('<div class="cl '+j.cls+'"><span class="ci" aria-hidden="true">'+j.icon+'</span><span>'+
+        (it.label?'<strong>'+it.label+':</strong> ':'')+j.msg+(j.note?'<em>'+j.note+'</em>':'')+'</span></div>');
+    });
+    if(FIELDS['calc-'+id+'-way'].empty())
+      lines.push('<div class="cl info"><span class="ci" aria-hidden="true">i</span><span>Der Rechenweg fehlt noch. Er gehört zur Aufgabe dazu.</span></div>');
+    if(needSol)lines.push('<button type="button" class="btn sm solbtn" data-id="'+id+'">Sollwert zeigen</button>');
+    $('chk-'+id).innerHTML=lines.join('');
+    return {good:good,total:items.length};
+  }
+  function showSol(id,btn){
+    var h='';
+    CHK[id].forEach(function(it){
+      h+='<div class="cl info"><span class="ci" aria-hidden="true">i</span><span>Sollwert'+(it.label?' ('+it.label+')':'')+': '+
+         sciHtml(it.ref)+(it.unit?' '+supHtml(it.unit):'')+'<em>auf 4 Stellen gerundet</em></span></div>';
+    });
+    btn.insertAdjacentHTML('beforebegin',h);
+    btn.remove();
+  }
+  function clearCheck(id){
+    if(id.indexOf('calc-')!==0)return;
+    var el=$('chk-'+id.split('-')[1]);
+    if(el&&el.innerHTML)el.innerHTML='';
+  }
+  function clearAllChecks(){CHK_IDS.forEach(function(id){var el=$('chk-'+id);if(el)el.innerHTML='';});}
+  main.addEventListener('click',function(e){
+    var b=e.target.closest?e.target.closest('.chkbtn,.solbtn'):null;
+    if(!b)return;
+    var id=b.getAttribute('data-id');
+    if(b.classList.contains('solbtn')){showSol(id,b);return;}
+    runCheck(id);
+    setTimeout(function(){var el=$('chk-'+id);if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest'});},300);
+  });
+  $('chkAllBtn').addEventListener('click',function(){
+    var good=0,total=0;
+    CHK_IDS.forEach(function(id){var r=runCheck(id);good+=r.good;total+=r.total;});
+    toast(good+' von '+total+' Ergebnissen stimmen.');
+    var first=document.querySelector('.chk .cl.bad,.chk .cl.warn,.chk .cl.info');
+    if(first&&first.scrollIntoView)setTimeout(function(){first.scrollIntoView({block:'center'});},300);
+  });
 
   /* Zwischenspeicher im Browser (nur Komfort) */
   function load(){
@@ -638,8 +894,13 @@ var M=(function(){
     $('progText').textContent=n+' von '+REQUIRED.length+' ausgefüllt';
     $('progBar').style.width=(n/REQUIRED.length*100)+'%';
   }
-  onChange=function(){progress();save();};
+  var LASTV={};
+  onChange=function(id){
+    progress();save();
+    if(id&&FIELDS[id]){var v=FIELDS[id].get();if(LASTV[id]!==v){LASTV[id]=v;clearCheck(id);}}
+  };
   load();
+  Object.keys(FIELDS).forEach(function(id){LASTV[id]=FIELDS[id].get();});
   document.querySelectorAll('textarea').forEach(grow);
   progress();
   document.addEventListener('input',function(ev){
@@ -661,7 +922,16 @@ var M=(function(){
     ta.remove();
   }
   function copyValue(td){
-    var v=td.textContent.trim();
+    function cellText(n){
+      var o='';
+      n.childNodes.forEach(function(c){
+        if(c.nodeType===3)o+=c.nodeValue;
+        else if(c.nodeName==='SUP')o+=toSupUni(c.textContent);
+        else o+=cellText(c);
+      });
+      return o;
+    }
+    var v=cellText(td).trim();
     function ok(){td.classList.add('tap');setTimeout(function(){td.classList.remove('tap');},600);toast('„'+v+'“ kopiert.');}
     if(navigator.clipboard&&navigator.clipboard.writeText){
       navigator.clipboard.writeText(v).then(ok,function(){legacyCopy(v);ok();});
@@ -683,12 +953,23 @@ var M=(function(){
     });
   }
 
-  /* iPad-Bildschirmtastatur: iOS legt die Tastatur ÜBER die Seite (Layouthöhe bleibt
-     unverändert). Solange ein Eingabefeld fokussiert ist, wird die App-Höhe deshalb an
-     den sichtbaren Bereich (visualViewport) angepasst: Kopfleiste bleibt oben sichtbar,
-     die Spalten darunter scrollen im verbleibenden Raum, nichts wird verdeckt. Der
-     offsetTop-Ausgleich fängt das automatische Weiter-Schieben der Ansicht durch iOS ab. */
-  var vv=window.visualViewport,isTouch=('ontouchstart' in window),kbField=false;
+  /* iPad-Bildschirmtastatur: iOS legt die Tastatur ÜBER die Seite (die Layouthöhe bleibt
+     unverändert). Solange die Tastatur sichtbar ist, bekommen <html> und <body> die Klasse
+     .kbm: Der Body ist dann eine feste Fläche genau so groß wie der sichtbare Bereich
+     (visualViewport). Das Dokument selbst scrollt nicht mehr, gescrollt wird nur in den
+     Spalten. Die Symbolleiste bleibt an ihrem Platz im DOM und wird per CSS unten am Body
+     angedockt – kein Umhängen mehr, also auch kein verlorener Tipp.
+     – Alle Änderungen laufen gebündelt über requestAnimationFrame (kein Flackern).
+     – „Tastatur offen“ heißt: Textfeld fokussiert UND sichtbarer Bereich um mehr als
+       KB_MIN px kleiner als das Layout-Fenster. Pinch-Zoom wird ignoriert, und kurz nach
+       einer Fenstergrößen-Änderung (Stage Manager, Drehen) bleibt der Zustand unverändert,
+       bis sich die Maße beruhigt haben. Eine Hardware-Tastatur zeigt nur eine schmale
+       Kürzel-Leiste (unter KB_MIN) → normales Layout. */
+  var vv=window.visualViewport,isTouch=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
+  var kbField=false,kbOn=false,kbRaf=0,kbHold=0,kbSaved=null,KB_MIN=100;
+  var htmlEl=document.documentElement,bodyEl=document.body;
+  var layoutEl=document.querySelector('.layout'),topEl=document.querySelector('.top');
+  var portraitMQ=window.matchMedia?window.matchMedia('(max-width:860px)'):null;
   function revealField(){
     var el=document.activeElement;
     if(!el||el===document.body)return;
@@ -696,67 +977,88 @@ var M=(function(){
     try{box.scrollIntoView({block:'nearest'});}catch(e){if(box.scrollIntoView)box.scrollIntoView();}
   }
   function setSt(el,k,val){if(el.style[k]!==val)el.style[k]=val;}
-  /* Leiste umhängen: im Tastatur-Modus ans Ende des Body (Flex-Spalte) → unten über
-     der Tastatur; sonst zurück auf den angestammten Platz oben in der Aufgabenspalte */
-  var kpEl=$('kp'),kpHome=$('main');
-  function dockKp(dock){
-    if(!kpEl)return;
-    if(dock){if(kpEl.parentElement!==document.body)document.body.appendChild(kpEl);}
-    else if(kpEl.parentElement!==kpHome)kpHome.insertBefore(kpEl,kpHome.firstChild);
+  function enterKb(){
+    kbSaved={y:window.pageYOffset||0,h:topEl?topEl.offsetHeight:0};
+    htmlEl.classList.add('kbm');bodyEl.classList.add('kbm');
+    kbOn=true;
+    /* Hochformat: bisherige Scrollposition des Dokuments in die .layout-Spalte übernehmen */
+    if(layoutEl&&portraitMQ&&portraitMQ.matches&&kbSaved.y>0)layoutEl.scrollTop=Math.max(0,kbSaved.y-kbSaved.h);
+    revealField();
   }
-  function fitKb(){
-    if(!vv)return;
-    var root=document.documentElement;
-    /* Ist die Tastatur gerade wirklich sichtbar? (vv.height schrumpft um ihre Höhe)
-       — nicht nur der Fokus entscheidet, sonst bleibt die Leiste unten hängen, wenn
-       iOS die Tastatur ohne blur-Ereignis schließt. */
-    var kbOpen=vv.height<window.innerHeight-40;
-    if(kbField&&isTouch&&kbOpen){
-      setSt(document.body,'height',vv.height+'px');
-      /* offsetTop-Ausgleich nur, wenn das Dokument selbst nicht scrollen kann
-         (Querformat/App-Ansicht). Im Hochformat scrollt iOS die Seite von selbst. */
-      var fits=root.scrollHeight<=window.innerHeight+2;
-      if(fits){
-        /* Auch das html-Element auf die sichtbare Höhe setzen: Sonst lässt iOS das
-           Fenster um die Tastaturhöhe hinausscrollen und die Seite verschwindet. */
-        setSt(root,'height',vv.height+'px');
-        setSt(root,'overflow','hidden');
-        var off=vv.offsetTop;
-        /* Immer anwesende 3d-Transform: body bleibt so konstanter Ursprung für die
-           unten angedockte Leiste (position:fixed) und wandert mit dem sichtbaren
-           Bereich mit; 4px-Stille verhindert Flackern beim Tippen der Symbole. */
-        setSt(document.body,'transform','translate3d(0,'+(off>3?Math.round(off):0)+'px,0)');
-        if(window.scrollX||window.scrollY)window.scrollTo(0,0);
-        if(root.scrollLeft)root.scrollLeft=0;
-        dockKp(true);
-      }else{
-        setSt(root,'height','');setSt(root,'overflow','');
-        setSt(document.body,'transform','translate3d(0,0,0)');
-        dockKp(false);
-      }
-      document.body.classList.toggle("kbm",true);
-    }else{
-      setSt(document.body,'height','');setSt(document.body,'transform','');
-      setSt(root,'height','');setSt(root,'overflow','');
-      document.body.classList.remove("kbm");
-      dockKp(false);
+  function leaveKb(){
+    var port=!!(portraitMQ&&portraitMQ.matches),st=(port&&layoutEl)?layoutEl.scrollTop:0;
+    setSt(bodyEl,'top','');setSt(bodyEl,'height','');
+    bodyEl.classList.remove('kbm');htmlEl.classList.remove('kbm');
+    kbOn=false;
+    if(port&&kbSaved)window.scrollTo(0,st+kbSaved.h);
+    kbSaved=null;
+  }
+  function applyKb(){
+    kbRaf=0;
+    if(!vv||vv.scale>1.02)return;
+    var want=kbField&&(window.innerHeight-vv.height)>KB_MIN;
+    if(Date.now()<kbHold)want=kbOn;
+    if(want){
+      setSt(bodyEl,'top',Math.round(vv.offsetTop)+'px');
+      setSt(bodyEl,'height',Math.round(vv.height)+'px');
+      if(!kbOn)enterKb();
+      if(window.scrollX||window.scrollY)window.scrollTo(0,0);
+    }else if(kbOn){
+      leaveKb();
     }
   }
+  function kbSchedule(){if(!kbRaf)kbRaf=requestAnimationFrame(applyKb);}
+  function kbHoldFor(ms){kbHold=Date.now()+ms;kbSchedule();setTimeout(kbSchedule,ms+40);}
+
+  /* Solange die Tastatur offen ist, darf die Ansicht nicht verrutschen: Wischen wird nur
+     zugelassen, wenn darunter ein Bereich liegt, der in dieser Richtung wirklich scrollen kann. */
+  function canScrollDir(el,horiz,d){
+    for(;el&&el.nodeType===1&&el!==htmlEl;el=el.parentElement){
+      var cs=getComputedStyle(el),ov=horiz?cs.overflowX:cs.overflowY;
+      if(ov!=='auto'&&ov!=='scroll')continue;
+      var max=horiz?el.scrollWidth-el.clientWidth:el.scrollHeight-el.clientHeight;
+      if(max<=1)continue;
+      var pos=horiz?el.scrollLeft:el.scrollTop;
+      return d>0?pos>0:pos<max-1;
+    }
+    return false;
+  }
+  var tg=null;
+  document.addEventListener('touchstart',function(e){
+    if(!kbOn||e.touches.length!==1){tg=null;return;}
+    var t=e.touches[0];
+    tg={x:t.clientX,y:t.clientY,axis:null,el:e.target};
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!kbOn||!tg||e.touches.length!==1)return;
+    var t=e.touches[0],dx=t.clientX-tg.x,dy=t.clientY-tg.y;
+    tg.x=t.clientX;tg.y=t.clientY;
+    if(!tg.axis){
+      if(!dx&&!dy)return;
+      tg.axis=Math.abs(dx)>Math.abs(dy)?'x':'y';
+    }
+    var horiz=tg.axis==='x',d=horiz?dx:dy;
+    if(!d)return;
+    if(!canScrollDir(tg.el,horiz,d)&&e.cancelable)e.preventDefault();
+  },{passive:false});
+
   if(vv&&isTouch){
-    vv.addEventListener('resize',fitKb);
-    vv.addEventListener('scroll',fitKb);
+    var kbOutT=0;
+    vv.addEventListener('resize',kbSchedule);
+    vv.addEventListener('scroll',kbSchedule);
+    window.addEventListener('resize',function(){kbHoldFor(300);});
+    window.addEventListener('orientationchange',function(){kbHoldFor(500);});
     document.addEventListener('focusin',function(e){
       var t=e.target;
       if(t&&((t.tagName==='INPUT'&&t.type==='text')||t.tagName==='TEXTAREA')){
-        kbField=true;
-        setTimeout(fitKb,80);setTimeout(fitKb,400);
+        clearTimeout(kbOutT);kbField=true;
+        kbSchedule();setTimeout(kbSchedule,120);setTimeout(kbSchedule,450);
         setTimeout(revealField,380);setTimeout(revealField,900);
       }
     });
     document.addEventListener('focusout',function(){
-      kbField=false;
-      setTimeout(fitKb,200);
-      setTimeout(fitKb,600);
+      clearTimeout(kbOutT);
+      kbOutT=setTimeout(function(){kbField=false;kbSchedule();setTimeout(kbSchedule,300);},150);
     });
   }
 
@@ -788,7 +1090,8 @@ var M=(function(){
       return;
     }
     clearTimeout(resetT);
-    Object.keys(FIELDS).forEach(function(id){FIELDS[id].reset();});
+    Object.keys(FIELDS).forEach(function(id){FIELDS[id].reset();LASTV[id]=FIELDS[id].get();});
+    clearAllChecks();
     document.querySelectorAll('textarea').forEach(grow);
     try{localStorage.removeItem(KEY);}catch(e){}
     progress();
@@ -992,7 +1295,7 @@ var M=(function(){
     y+=14;rule(INK,1);y+=1;
     rows.forEach(function(r){
       g.fillStyle=INK;g.font='400 11px '+F_BODY;g.fillText(r[0],c1,y+14);
-      g.font='400 10.5px '+F_MONO;g.fillText(r[1],c2,y+14);g.fillText(r[2],c3+60,y+14);
+      g.font='400 10.5px '+F_MONO;g.fillText(r[1],c2,y+14);seqBox(richSeq(r[2]),10.5,g).draw(g,c3+60,y+14);
       y+=20;rule(LINE,.8);
     });
     y+=20;
@@ -1014,7 +1317,7 @@ var M=(function(){
       else{g.font='500 13px '+F_MONO;g.fillText(sym+' =',X,base);x0=X+44;}
       g.fillStyle=INK;box.draw(g,x0+6,base);
       g.fillStyle=INK;g.fillRect(x0,y+rowH-4,fw,.9);
-      if(unit){g.font='400 12px '+F_MONO;g.fillStyle=INK;g.fillText(unit,x0+fw+8,base);}
+      if(unit){g.fillStyle=INK;seqBox(richSeq(unit),12,g).draw(g,x0+fw+8,base);}
       y+=rowH+4;
     }
     function resH(id){var b=seqBox(FIELDS[id].seq(),13,g);return b.asc+b.desc+14;}
