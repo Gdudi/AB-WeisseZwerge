@@ -198,7 +198,6 @@ body.kbm .toast{position:absolute;bottom:60px}
 .btn.sm{min-height:36px;padding:4px 12px;font-size:14px}
 .chk{display:grid;gap:6px;width:100%}
 .chk:empty{display:none}
-.chk>.solbtn{justify-self:start}
 .cl{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border-radius:8px;border:1px solid var(--line);font-size:14.5px;line-height:1.4;background:var(--field);color:var(--ink)}
 .cl .ci{flex:none;width:1.3em;text-align:center;font-weight:700}
 .cl em{display:block;font-style:normal;color:var(--muted);font-size:13px}
@@ -825,29 +824,18 @@ var M=(function(){
     return {cls:'bad',icon:'✗',msg:'Weicht deutlich ab (etwa Faktor '+fmtFac(f)+' zu '+(r>1?'groß':'klein')+'). Prüfe Formel, Einheiten und Zehnerpotenz.',note:note};
   }
   function runCheck(id){
-    var items=CHK[id],vals=gatherVals(),res=[],lines=[],needSol=false,good=0;
+    var items=CHK[id],vals=gatherVals(),res=[],lines=[],good=0;
     items.forEach(function(it){
       var j=judge(it,evalSeq(FIELDS[it.f].seq()),vals);
       res.push(j);
       if(j.cls==='ok')good++;
-      if(j.cls==='bad'||j.cls==='warn')needSol=true;
       lines.push('<div class="cl '+j.cls+'"><span class="ci" aria-hidden="true">'+j.icon+'</span><span>'+
         (it.label?'<strong>'+it.label+':</strong> ':'')+j.msg+(j.note?'<em>'+j.note+'</em>':'')+'</span></div>');
     });
     if(FIELDS['calc-'+id+'-way'].empty())
       lines.push('<div class="cl info"><span class="ci" aria-hidden="true">i</span><span>Der Rechenweg fehlt noch. Er gehört zur Aufgabe dazu.</span></div>');
-    if(needSol)lines.push('<button type="button" class="btn sm solbtn" data-id="'+id+'">Sollwert zeigen</button>');
     $('chk-'+id).innerHTML=lines.join('');
     return {good:good,total:items.length};
-  }
-  function showSol(id,btn){
-    var h='';
-    CHK[id].forEach(function(it){
-      h+='<div class="cl info"><span class="ci" aria-hidden="true">i</span><span>Sollwert'+(it.label?' ('+it.label+')':'')+': '+
-         sciHtml(it.ref)+(it.unit?' '+supHtml(it.unit):'')+'<em>auf 4 Stellen gerundet</em></span></div>';
-    });
-    btn.insertAdjacentHTML('beforebegin',h);
-    btn.remove();
   }
   function clearCheck(id){
     if(id.indexOf('calc-')!==0)return;
@@ -856,10 +844,9 @@ var M=(function(){
   }
   function clearAllChecks(){CHK_IDS.forEach(function(id){var el=$('chk-'+id);if(el)el.innerHTML='';});}
   main.addEventListener('click',function(e){
-    var b=e.target.closest?e.target.closest('.chkbtn,.solbtn'):null;
+    var b=e.target.closest?e.target.closest('.chkbtn'):null;
     if(!b)return;
     var id=b.getAttribute('data-id');
-    if(b.classList.contains('solbtn')){showSol(id,b);return;}
     runCheck(id);
     setTimeout(function(){var el=$('chk-'+id);if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest'});},300);
   });
